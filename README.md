@@ -1,7 +1,7 @@
 # USER-UEF
 A LAMMPS package for molecular dynamics under extensional flow fields
 
-<img src="https://github.mit.edu/danich/USER-UEF/blob/master/img/uniaxial_box.gif?raw=true" width=300 />
+<img src="https://github.com/danicholson/UEF/blob/master/img/uniaxial_box.gif?raw=true" width=300 />
 
 ## Introduction
 USER-UEF is a LAMMPS package for non-equilibrium molecular dynamics (NEMD) under diagonal flow fields, including uniaxial and biaxial flows. With this package, simulations under flow may be carried out for an indefinite amount of time, extending the functionality of LAMMPS to include steady-state diagonal flow fields. It is an implementation of the boundary conditions developed by [Matthew Dobson](http://arxiv.org/abs/1408.7078), and also uses numerical lattice reduction as was proposed by [Thomas Hunt](http://arxiv.org/abs/1310.3905). The lattice reduction algorithm used was developed by [Igor Semaev](http://link.springer.com/chapter/10.1007%2F3-540-44670-2_13). The package is intended for simulations of homogeneous flows, and integrates the SLLOD equations of motion. 
@@ -101,7 +101,7 @@ Additional keywords:
 
 The simulation box used in the boundary conditions developed by Hunt and Dobson does not have a consistent alignment relative to the applied flow field. This can be seen in the video of the simulation box under uniaxial extension at the top of the page. LAMMPS utilizes an upper-triangular simulation box, making it impossible to express the evolving simulation box in the same coordinate system as the flow field. The USER-UEF package keeps track of two coordinate systems: the flow frame, and the upper triangular LAMMPS frame. The coordinate systems are related to each other through the QR decomposition, as is illustrated in the image below.
 
-<img src="https://github.mit.edu/danich/USER-UEF/blob/master/img/frames.jpg?raw=true" width=300 />
+<img src="https://github.com/danicholson/UEF/blob/master/img/frames.jpg?raw=true" width=300 />
 
 During most molecular dynamics operations, the system is represented in the LAMMPS frame. Only when the positions and velocities are updated is the system rotated to the flow frame, and it is rotated back to the LAMMPS frame immediately afterwards. For this reason, all vector-valued quantities (except for the pressure tensor from `compute pressure/uef`) will be computed in the LAMMPS frame. Rotationally invariant scalar quantites like the temperature and hydrostatic pressure, on the other hand, will be computed correctly. Additionally, the system is in the LAMMPS frame during all of the output steps, and therefore trajectory files made using the `dump` command will be in the LAMMPS frame. 
 
