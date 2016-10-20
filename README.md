@@ -1,5 +1,5 @@
 # USER-UEF
-A LAMMPS package for molecular dynamics under diagonal flow fields
+A LAMMPS package for molecular dynamics under extensional flow fields
 
 <img src="https://github.mit.edu/danich/USER-UEF/blob/master/img/uniaxial_box.gif?raw=true" width=300 />
 
@@ -22,8 +22,8 @@ The following commands will install the package in a fresh version of the curren
 ```
 wget http://lammps.sandia.gov/tars/lammps-stable.tar.gz
 tar -xvf lammps-stable.tar.gz
-git clone [LINK TO PUBLIC REPO HERE]
-cp -r USER-UEF/USER-UEF/ lammps-*/src
+git clone https://github.com/danicholson/UEF.git
+cp -r UEF/USER-UEF/ lammps-*/src
 cd lammps-*/src/
 [compile LAMMPS (e.g. make mpi)]
 ```
@@ -65,16 +65,28 @@ Examples:
   * Biaxial flow<br>`fix f2 all npt/uef temp 400 400 300 z 1 1 3000 erate 0.000005 0.000005`
 
 ### compute pressure/uef
-Note: It is generally not necessary to use this command since a `fix nvt/uef` or `fix npt/uef` will contain an instance of this compute. See the note below for details.
+Note: It is generally not advisable to use this command in input scripts. A `fix nvt/uef` or `fix npt/uef` will always contain an instance of this compute. See the note below for details.
 * `compute ID all pressure/uef temp-ID`
   * ID = name for the compute
   * temp-ID = ID of compute that calculates temperature<br><br>
 Additional keywords: 
   * One of the following additional keywords from [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) may be used with this fix: ke or pair or bond or angle or dihedral or improper or kspace or fix or virial<br><br>
  Example:
-  * `compute c1 all pressure/uef thermo_temp`
+  * `compute c1 all pressure/uef c_1_temp`
 
 #### Usage notes
+The results of a `compute pressure/uef` are only accurate if it's temperature compute, specified by `temp-ID`, is the temperature compute for a `fix nvt/uef` or `fix npt/uef`. Specifically, the kinetic energy tensor will not be in the correct coordinate system unless this is the case. Additionally, the kinetic energy tensor for `temp-ID` should not be
+
+### dump cfg/uef
+* `dump ID all cfg/uef mass type xs ys zs keyword value`
+Additional keywords: 
+  * See the documentation for [`dump cfg`](http://lammps.sandia.gov/doc/dump.html) for additional keywords. 
+
+#### Usage notes
+
+* Only the atomic positions will be in the reference frame of the flow field when `dump cfg/uef` is used. If the atomic velocities are specified as an output, for example, their values will correspond a coordinate system with an upper triangular simulation box.
+
+
 *  The uef fixes use the SLLOD equations of motion, which lead to an instability in the center of mass velocity. A `fix momentum` should be used to regularly reset the linear momentum.
 *  The uef fixes store the peculiar velocities rather than the total velocities, in contrast to the LAMMPS [`fix nvt/sllod`](http://lammps.sandia.gov/doc/fix_nvt_sllod.html?highlight=sllod) command.
 *  When the strain keyword is unset, or set to zero, the initial simulation box must be cubic and have style triclinic. If the box is initially of type ortho, use the command `change box all triclinic` before invoking the fix.
@@ -83,7 +95,6 @@ Additional keywords:
 * The uef fixes are compatible with `run_style respa`
 * The uef fixes are compatible with `fix modify`, however custom pressure computes must be of type `pressure/uef`. 
 * Any trajectories written when one of the above fixes is used will not be in the same coordinate system as the flow field unless `dump cfg/uef` is used.
-* Only the atomic positions will be in the reference frame of the flow field when `dump cfg/uef` is used. If the atomic velocities are specified as an output, for example, their values will correspond a coordinate system with an upper triangular simulation box.
 * Vector or tensor-valued quantities computed, except for the pressure tensor from `compute pressure/uef`, will not be in the same coordinate system as the flow field. 
 
 ## Implementation Details
