@@ -1,19 +1,19 @@
-# USER-UEF
+# UEF
 A LAMMPS package for molecular dynamics under extensional flow fields
 
 <img src="https://github.com/danicholson/UEF/blob/master/img/uniaxial_box.gif?raw=true" width=300 />
 
 ## Introduction
-USER-UEF is a LAMMPS package for non-equilibrium molecular dynamics (NEMD) under diagonal flow fields, including uniaxial and biaxial flows. With this package, simulations under flow may be carried out for an indefinite amount of time, extending the functionality of LAMMPS to include steady-state diagonal flow fields. It is an implementation of the boundary conditions developed by [Matthew Dobson](http://arxiv.org/abs/1408.7078), and also uses numerical lattice reduction as was proposed by [Thomas Hunt](http://arxiv.org/abs/1310.3905). The lattice reduction algorithm used was developed by [Igor Semaev](http://link.springer.com/chapter/10.1007%2F3-540-44670-2_13). The package is intended for simulations of homogeneous flows, and integrates the SLLOD equations of motion. 
+UEF is a LAMMPS package for non-equilibrium molecular dynamics (NEMD) under diagonal flow fields, including uniaxial and biaxial flows. With this package, simulations under flow may be carried out for an indefinite amount of time, extending the functionality of LAMMPS to include steady-state diagonal flow fields. It is an implementation of the boundary conditions developed by [Matthew Dobson](http://arxiv.org/abs/1408.7078), and also uses numerical lattice reduction as was proposed by [Thomas Hunt](http://arxiv.org/abs/1310.3905). The lattice reduction algorithm used was developed by [Igor Semaev](http://link.springer.com/chapter/10.1007%2F3-540-44670-2_13). The package is intended for simulations of homogeneous flows, and integrates the SLLOD equations of motion. 
 
 ## Contents
 * [Installation](#installation)
 * [Usage](#usage)
-  * [fix nvt/uef](#fix-nvtuef)
-  * [fix npt/uef](#fix-nptuef)
-  * [compute temp/uef](#compute-tempuef)
-  * [compute pressure/uef](#compute-pressureuef)
-  * [dump cfg/uef](#dump-cfguef)
+ * [fix nvt/uef](#fix-nvtuef)
+ * [fix npt/uef](#fix-nptuef)
+ * [compute temp/uef](#compute-tempuef)
+ * [compute pressure/uef](#compute-pressureuef)
+ * [dump cfg/uef](#dump-cfguef)
 * [Implementation Details](#implementation-details)
 * [Examples](#examples)
 * [Error and Warning Messages](#error-and-warning-messages)
@@ -44,50 +44,69 @@ make yes-user-uef
 
 ## Usage
 
-The package defines `fix nvt/uef` and `fix npt/uef` for constant volume and stress-controlled simulations, `compute pressure/uef` and `compute temp/uef` to compute the pressure and kinetic energy tensors, and `dump cfg/uef` for outputting preoperly oriented atomic coordinates.
+The package defines `fix nvt/uef` and `fix npt/uef` for constant volume and stress-controlled simulations, `compute pressure/uef` and `compute temp/uef` to compute the pressure and kinetic energy tensors, and `dump cfg/uef` for outputting properly oriented atomic coordinates.
+
+***
 
 ### fix nvt/uef
+#### Syntax
 * `fix ID all nvt/uef temp Tstart Tstop Tdamp erate eps_x eps_y keyword values ...`
-  * ID = name for the fix
-  * Tstart,Tstop = external temperature at start/end of run
-  * Tdamp = temperature damping parameter (time units)
-  * eps_x = strain rate in x dimension 1/(time units) 
-  * eps_y = strain rate in y dimension 1/(time units)<br><br>
-Additional keywords:
-  * strain = initial level of strain (default="0 0"). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.<br>
-  * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: tchain, tloop, drag<br><br>
-Examples: 
-  * Uniaxial flow<br>`fix f1 all nvt/uef temp 400 400 100 erate 0.00001 -0.000005`
-  * Biaxial flow<br>`fix f2 all nvt/uef temp 400 400 100 erate 0.000005 0.000005`
+ * ID = name for the fix
+ * Tstart,Tstop = external temperature at start/end of run
+ * Tdamp = temperature damping parameter (time units)
+ * eps_x = strain rate in x dimension 1/(time units) 
+ * eps_y = strain rate in y dimension 1/(time units)<br><br>Additional keywords:
+ 
+ * strain = initial level of strain (default="0 0"). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.<br>
+ * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: tchain, tloop, drag
+ 
+#### Examples
+ * Uniaxial flow<br>`fix f1 all nvt/uef temp 400 400 100 erate 0.00001 -0.000005`
+ * Biaxial flow<br>`fix f2 all nvt/uef temp 400 400 100 erate 0.000005 0.000005`
 
 #### Usage notes
+Due to requirements of the boundary conditions, when the strain keyword is unset, or set to zero, the initial simulation box must be cubic and have style triclinic. If the box is initially of type ortho, use the command `change box all triclinic` before invoking the fix.
 
+This fix integrates the SLLOD equations of motion, which lead to an instability in the center of mass velocity under extension. A [`fix momentum`](http://lammps.sandia.gov/doc/fix_momentum.html) should be used to regularly reset the linear momentum. Additionally, this fix stores the peculiar velocity of each atom, defined as the velocity relative to the streaming velocity. This is in contrast to the LAMMPS [`fix nvt/sllod`](http://lammps.sandia.gov/doc/fix_nvt_sllod.html?highlight=sllod) command.
+
+This fix defines a `compute pressure/uef` and `compute temp/uef` that can be be accessed at `c_ID_press` and `c_ID_temp` respectively for scalar values, or `c_ID_press[i]` and `c_ID_temp[i]` for the pressure and kinetic energy tensors.
+
+When this fix is applied, any orientation-dependent vector or tensor-valued quantities computed, except for the tensors from `compute pressure/uef`/`compute temp/uef` and coordinates from `dump cfg/uef`, will not be in the same coordinate system as the flow field. See the [implementation details](#implementation-details) for further information.
+
+The uef fixes can be used with `write_restart` and `read_restart`, `run_style respa`, and `fix modify`, however custom pressure computes must be of type `pressure/uef`. 
+
+***
 
 ### fix npt/uef
 #### Syntax
 * `fix ID all npt/uef temp Tstart Tend Tdamp erate eps_x eps_y keyword value...`
-  * ID = name for the fix
-  * Tstart,Tstop = external temperature at start/end of run
-  * Tdamp = temperature damping parameter (time units)
-  * Pstart,Pstop = external pressure at start/end of run
-  * Pdamp = pressure damping parameter (time units)
-  * eps_x = strain rate in x dimension 1/(time units) 
-  * eps_y = strain rate in y dimension 1/(time units)<br><br>
-Additional keywords: 
-  * x or y or z = Pstart Pstop Pdamp
-  * iso = Pstart Pstop Pdamp
-  * strain = initial level of strain (default=0). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.
-  * ext = x or y or z or xy or xz or yz or xyz (default=xyz). These are "external" dimensions used in pressure control. For example, for uniaxial extension in the z direction, x and y correspond to free surfaces. The setting xy will only control (P_xx+P_yy)/2 to the target external pressure.    
-  * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: couple, tchain, pchain, tloop, ploop, drag<br><br>
+ * ID = name for the fix
+ * Tstart,Tstop = external temperature at start/end of run
+ * Tdamp = temperature damping parameter (time units)
+ * Pstart,Pstop = external pressure at start/end of run
+ * Pdamp = pressure damping parameter (time units)
+ * eps_x = strain rate in x dimension 1/(time units) 
+ * eps_y = strain rate in y dimension 1/(time units)<br><br>Additional keywords: 
+ * x or y or z = Pstart Pstop Pdamp
+ * iso = Pstart Pstop Pdamp
+ * strain = initial level of strain (default=0). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.
+ * ext = x or y or z or xy or xz or yz or xyz (default=xyz). These are "external" dimensions used in pressure control. For example, for uniaxial extension in the z direction, x and y correspond to free surfaces. The setting xy will only control (P_xx+P_yy)/2 to the target external pressure.    
+ * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: couple, tchain, pchain, tloop, ploop, drag<br><br>
   
 #### Examples 
 * Uniaxial flow<br>`fix f1 all npt/uef temp 400 400 300 iso 1 1 3000 erate 0.00001 -0.000005 ext yz`
 * Biaxial flow<br>`fix f2 all npt/uef temp 400 400 300 z 1 1 3000 erate 0.000005 0.000005`
 
 #### Usage notes
-There are two ways to control the pressure. The first method involves using the`ext` keyword along with the `iso` pressure style. With this method, the pressure is controlled by scaling the simulation box isotropically to achieve the average stress in the directions specified by `ext`. 
+The usage notes for `fix nvt/uef` apply to `fix npt/uef` as well. There are two ways to control the pressure using this fix. The first method involves using the`ext` keyword along with the `iso` pressure style. With this method, the pressure is controlled by scaling the simulation box isotropically to achieve the average stress in the directions specified by `ext`. 
 
-The second method involves setting the normal stresses using the `x` `y` , and `z` keywords. When using this method, the same pressure must be specified via `Pstart` and `Pstop` for all dimensions controlled. Any choice of pressure conditions that would cause LAMMPS to compute a deviatoric stress are not permissable and will result in an error. Additionally, all dimensions with controlled stress must have the same applied strain rate. The `ext` keyword should be set to the default value (`xyz`) which using this method. 
+For example, this command will control the hydrostatic pressure under uniaxial tension:
+* `fix f1 all npt/uef temp 0.7 0.7 0.5 iso 1 1 5 erate -0.5 -0.5 ext xyz`
+
+This command will control the average stress in compression directions under uniaxial tension:
+* `fix f1 all npt/uef temp 0.7 0.7 0.5 iso 1 1 5 erate -0.5 -0.5 ext xy`
+
+The second method involves setting the normal stresses using the `x` `y` , and/or `z` keywords. When using this method, the same pressure must be specified via `Pstart` and `Pstop` for all dimensions controlled. Any choice of pressure conditions that would cause LAMMPS to compute a deviatoric stress are not permissable and will result in an error. Additionally, all dimensions with controlled stress must have the same applied strain rate. The `ext` keyword must be set to the default value (`xyz`) when using this method. 
 
 For example, the following commands will work:
 * `fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 y 1 1 5 erate -0.5 -0.5`
@@ -97,19 +116,26 @@ The following commands will not work:
 * `fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 z 1 1 5 erate -0.5 -0.5`
 * `fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 z 2 2 5 erate 0.5 0.5`
 
-
+***
 
 ### compute pressure/uef
+#### Syntax
 * `compute ID all pressure/uef temp-ID`
-  * ID = name for the compute
-  * temp-ID = ID of compute that calculates temperature<br><br>
-Additional keywords: 
-  * The following additional keywords from [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) may be used with this fix: ke or pair or bond or angle or dihedral or improper or kspace or fix or virial<br><br>
- Example:
+ * ID = name for the compute
+ * temp-ID = ID of compute that calculates temperature<br><br>Additional keywords: 
+ * The following additional keywords from [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) may be used with this fix: ke or pair or bond or angle or dihedral or improper or kspace or fix or virial
+ 
+#### Examples
   * `compute c1 all pressure/uef c_1_temp`
 
 #### Usage notes
-The stress tensor computed from `compute pressure/uef` is only accurate if it's temperature compute, specified by `temp-ID`, is a `compute temp/uef`. See the documentation for [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) for further details on output.
+This compute requires a`fix nvt/uef` or `fix npt/uef`. It computes the pressure tensor in the reference frame of the flow field.
+
+The pressure tensor computed from `compute pressure/uef` is only accurate if its temperature compute, specified by `temp-ID`, is a `compute temp/uef`. 
+
+See the documentation for [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) for further details on output.
+
+***
 
 ### compute temp/uef
 #### Syntax
@@ -120,27 +146,25 @@ The stress tensor computed from `compute pressure/uef` is only accurate if it's 
  *`compute c1 all temp/uef`
 
 #### Usage notes
+This compute requires a `fix nvt/uef` or `fix npt/uef`. It computes the kinetic energy tensor in the reference frame of the flow field.
+
 See the documentation for [`compute temp`](http://lammps.sandia.gov/doc/compute_pressure.html) for further details on output.
 
+***
+
 ### dump cfg/uef
+#### Syntax
 * `dump ID all cfg/uef mass type xs ys zs keyword value`
 Additional keywords: 
-  * See the documentation for [`dump cfg`](http://lammps.sandia.gov/doc/dump.html) for additional keywords. 
+ * See the documentation for [`dump cfg`](http://lammps.sandia.gov/doc/dump.html) for additional keywords.
+  
+#### Examples
+* `compute c1 all cfg/uef mass type xs ys zs`
 
 #### Usage notes
+This command requires a `fix nvt/uef` or `fix npt/uef`. It outputs the atomic positions in the reference frame of the flow field. Only the positions are in the proper reference frame; if the atomic velocities are specified as an output, for example, they will not be in the flow field reference frame.
 
-* Only the atomic positions will be in the reference frame of the flow field when `dump cfg/uef` is used. If the atomic velocities are specified as an output, for example, their values will correspond a coordinate system with an upper triangular simulation box.
-
-
-*  The uef fixes use the SLLOD equations of motion, which lead to an instability in the center of mass velocity. A `fix momentum` should be used to regularly reset the linear momentum.
-*  The uef fixes store the peculiar velocities rather than the total velocities, in contrast to the LAMMPS [`fix nvt/sllod`](http://lammps.sandia.gov/doc/fix_nvt_sllod.html?highlight=sllod) command.
-*  When the strain keyword is unset, or set to zero, the initial simulation box must be cubic and have style triclinic. If the box is initially of type ortho, use the command `change box all triclinic` before invoking the fix.
-* Each fix defines a `compute pressure/uef` and `compute temp` that can be be accessed at `c_ID_press` and `c_ID_temp` respectively for scalar values, or `c_ID_press[i]` and `c_ID_temp[i]` for the pressure and kinetic energy tensors. The symmetric tensors are stored as vectors, and the values of i from 1 to 6 correspond to components xx, yy, zz, xy, xz, yz. This is the recommended method for obtaining the pressure tensor. The scalar value for the pressure will correspond to the average stress only in the directions indicated by the ext keyword if it is set. The kinetic energy tensor will not correspond to the coordinate system of the flow field.
-* The uef fixes can be used with `write_restart` and `read_restart`. 
-* The uef fixes are compatible with `run_style respa`
-* The uef fixes are compatible with `fix modify`, however custom pressure computes must be of type `pressure/uef`. 
-* Any trajectories written when one of the above fixes is used will not be in the same coordinate system as the flow field unless `dump cfg/uef` is used.
-* Vector or tensor-valued quantities computed, except for the pressure tensor from `compute pressure/uef`, will not be in the same coordinate system as the flow field. 
+***
 
 ## Implementation Details
 
