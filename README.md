@@ -6,6 +6,19 @@ A LAMMPS package for molecular dynamics under extensional flow fields
 ## Introduction
 USER-UEF is a LAMMPS package for non-equilibrium molecular dynamics (NEMD) under diagonal flow fields, including uniaxial and biaxial flows. With this package, simulations under flow may be carried out for an indefinite amount of time, extending the functionality of LAMMPS to include steady-state diagonal flow fields. It is an implementation of the boundary conditions developed by [Matthew Dobson](http://arxiv.org/abs/1408.7078), and also uses numerical lattice reduction as was proposed by [Thomas Hunt](http://arxiv.org/abs/1310.3905). The lattice reduction algorithm used was developed by [Igor Semaev](http://link.springer.com/chapter/10.1007%2F3-540-44670-2_13). The package is intended for simulations of homogeneous flows, and integrates the SLLOD equations of motion. 
 
+## Contents
+* [Installation](#installation)
+* [Usage](#usage)
+  * [fix nvt/uef](#fix-nvtuef)
+  * [fix npt/uef](#fix-nptuef)
+  * [compute temp/uef](#compute-tempuef)
+  * [compute pressure/uef](#compute-pressureuef)
+  * [dump cfg/uef](#dump-cfguef)
+* [Implementation Details](#implementation-details)
+* [Examples](#examples)
+* [Error and Warning Messages](#error-and-warning-messages)
+
+
 ## Installation
 The implementation has been tested in the Jul. 30, 2016 stable version of LAMMPS. Older versions may not be compatible.
 
