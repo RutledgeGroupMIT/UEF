@@ -22,14 +22,13 @@ UEF is a LAMMPS package for non-equilibrium molecular dynamics (NEMD) under diag
 ## Installation
 The implementation has been tested in the Jul. 30, 2016 stable version of LAMMPS. Older versions may not be compatible.
 
-The USER-UEF package is compiled alongside LAMMPS, and doesn't require any additional libraries. Installation will change some of the LAMMPS source files, but these changes will not affect the base functionality of LAMMPS.
+The USER-UEF package is compiled within LAMMPS, and doesn't require any additional libraries or modify the LAMMPS source code.
 
 To install the package from a LAMMPS distribution located at `lammps/`
 
 1. Clone this repository and copy the `USER-UEF/` subdirectory into the `lammps/src/` directory. 
-2. Move into `lammps/src/USER-UEF/` and run the `initialize.sh` script. This script will make necessary changes to source files in LAMMPS. Original source files are saved within `lammps/src/USER-UEF/` with a `.orig` suffix and may be restored with the `revert.sh` script if necessary. 
-3. Move into `lammps/src/` then run `make yes-USER-UEF`. 
-4. At this point LAMMPS is ready to be compiled. See the LAMMPS [documentation](http://lammps.sandia.gov/doc/Section_start.html#start-2) for compilation instructions.
+2. Move into `lammps/src/` then run `make yes-USER-UEF`. 
+3. Compile LAMMPS. See the LAMMPS [documentation](http://lammps.sandia.gov/doc/Section_start.html#start-2) for compilation instructions.
 
 The following commands will install the package in a fresh version of the current stable LAMMPS package to the current directory.
 ```
@@ -117,6 +116,21 @@ The following commands will not work:
 
 ***
 
+### compute temp/uef
+#### Syntax
+* `compute ID all temp/uef`
+  * ID = name for the compute
+  
+#### Examples
+ *`compute c1 all temp/uef`
+
+#### Usage notes
+This compute requires a `fix nvt/uef` or `fix npt/uef`. It computes the kinetic energy tensor in the reference frame of the flow field.
+
+See the documentation for [`compute temp`](http://lammps.sandia.gov/doc/compute_pressure.html) for further details on output.
+
+***
+
 ### compute pressure/uef
 #### Syntax
 * `compute ID all pressure/uef temp-ID`
@@ -136,32 +150,20 @@ See the documentation for [`compute pressure`](http://lammps.sandia.gov/doc/comp
 
 ***
 
-### compute temp/uef
-#### Syntax
-* `compute ID all temp/uef`
-  * ID = name for the compute
-  
-#### Examples
- *`compute c1 all temp/uef`
-
-#### Usage notes
-This compute requires a `fix nvt/uef` or `fix npt/uef`. It computes the kinetic energy tensor in the reference frame of the flow field.
-
-See the documentation for [`compute temp`](http://lammps.sandia.gov/doc/compute_pressure.html) for further details on output.
-
-***
-
 ### dump cfg/uef
 #### Syntax
-* `dump ID all cfg/uef mass type xs ys zs keyword value`
-Additional keywords: 
+* `dump ID all cfg/uef N file mass type xs ys zs keyword value`
+ * N =  dump every this many timesteps
+ * file = name of file to write dump info to<br><br>Additional keywords: 
  * See the documentation for [`dump cfg`](http://lammps.sandia.gov/doc/dump.html) for additional keywords.
   
 #### Examples
-* `compute c1 all cfg/uef mass type xs ys zs`
+* `dump d1 all cfg/uef 100 dump.*.cfg mass type xs ys zs`
 
 #### Usage notes
 This command requires a `fix nvt/uef` or `fix npt/uef`. It outputs the atomic positions in the reference frame of the flow field. Only the positions are in the proper reference frame; if the atomic velocities are specified as an output, for example, they will not be in the flow field reference frame.
+
+See the [`dump cfg`](http://lammps.sandia.gov/doc/dump.html) documentation for further information on writing trajectories with cfg files.
 
 ***
 
