@@ -25,12 +25,14 @@ tar -xvf lammps-stable.tar.gz
 git clone https://github.com/danicholson/UEF.git
 cp -r UEF/USER-UEF/ lammps-*/src
 cd lammps-*/src/
+make yes-user-uef
 [compile LAMMPS (e.g. make mpi)]
 ```
 
 ## Usage
 
-The package defines `fix nvt/uef` and `fix npt/uef` for constant volume and stress-controlled simulations respectively, `compute pressure/uef` to compute the pressure tensor, and `dump cfg/uef` for outputting coordinates in the reference frame of the flow field.
+The package defines `fix nvt/uef` and `fix npt/uef` for constant volume and stress-controlled simulations, `compute pressure/uef` and `compute temp/uef` to compute the pressure and kinetic energy tensors, and `dump cfg/uef` for outputting preoperly oriented atomic coordinates.
+
 ### fix nvt/uef
 * `fix ID all nvt/uef temp Tstart Tstop Tdamp erate eps_x eps_y keyword values ...`
   * ID = name for the fix
@@ -39,13 +41,17 @@ The package defines `fix nvt/uef` and `fix npt/uef` for constant volume and stre
   * eps_x = strain rate in x dimension 1/(time units) 
   * eps_y = strain rate in y dimension 1/(time units)<br><br>
 Additional keywords:
-  * strain = initial level of strain (default=0). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.<br>
+  * strain = initial level of strain (default="0 0"). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.<br>
   * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: tchain, tloop, drag<br><br>
 Examples: 
   * Uniaxial flow<br>`fix f1 all nvt/uef temp 400 400 100 erate 0.00001 -0.000005`
   * Biaxial flow<br>`fix f2 all nvt/uef temp 400 400 100 erate 0.000005 0.000005`
 
+#### Usage notes
+
+
 ### fix npt/uef
+#### Syntax
 * `fix ID all npt/uef temp Tstart Tend Tdamp erate eps_x eps_y keyword value...`
   * ID = name for the fix
   * Tstart,Tstop = external temperature at start/end of run
@@ -60,22 +66,48 @@ Additional keywords:
   * strain = initial level of strain (default=0). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.
   * ext = x or y or z or xy or xz or yz or xyz (default=xyz). These are "external" dimensions used in pressure control. For example, for uniaxial extension in the z direction, x and y correspond to free surfaces. The setting xy will only control (P_xx+P_yy)/2 to the target external pressure.    
   * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: couple, tchain, pchain, tloop, ploop, drag<br><br>
-Examples: 
-  * Uniaxial flow<br>`fix f1 all npt/uef temp 400 400 300 iso 1 1 3000 erate 0.00001 -0.000005 ext yz`
-  * Biaxial flow<br>`fix f2 all npt/uef temp 400 400 300 z 1 1 3000 erate 0.000005 0.000005`
+  
+#### Examples 
+* Uniaxial flow<br>`fix f1 all npt/uef temp 400 400 300 iso 1 1 3000 erate 0.00001 -0.000005 ext yz`
+* Biaxial flow<br>`fix f2 all npt/uef temp 400 400 300 z 1 1 3000 erate 0.000005 0.000005`
+
+#### Usage notes
+There are two ways to control the pressure. The first method involves using the`ext` keyword along with the `iso` pressure style. With this method, the pressure is controlled by scaling the simulation box isotropically to achieve the average stress in the directions specified by `ext`. 
+
+The second method involves setting the normal stresses using the `x` `y` , and `z` keywords. When using this method, the same pressure must be specified via `Pstart` and `Pstop` for all dimensions controlled. Any choice of pressure conditions that would cause LAMMPS to compute a deviatoric stress are not permissable and will result in an error. Additionally, all dimensions with controlled stress must have the same applied strain rate. The `ext` keyword should be set to the default value (`xyz`) which using this method. 
+
+For example, the following commands will work:
+* `fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 y 1 1 5 erate -0.5 -0.5`
+* `fix f1 all npt/uef temp 0.7 0.7 0.5 z 1 1 5 erate 0.5 0.5`
+
+The following commands will not work:
+* `fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 z 1 1 5 erate -0.5 -0.5`
+* `fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 z 2 2 5 erate 0.5 0.5`
+
+
 
 ### compute pressure/uef
-Note: It is generally not advisable to use this command in input scripts. A `fix nvt/uef` or `fix npt/uef` will always contain an instance of this compute. See the note below for details.
 * `compute ID all pressure/uef temp-ID`
   * ID = name for the compute
   * temp-ID = ID of compute that calculates temperature<br><br>
 Additional keywords: 
-  * One of the following additional keywords from [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) may be used with this fix: ke or pair or bond or angle or dihedral or improper or kspace or fix or virial<br><br>
+  * The following additional keywords from [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) may be used with this fix: ke or pair or bond or angle or dihedral or improper or kspace or fix or virial<br><br>
  Example:
   * `compute c1 all pressure/uef c_1_temp`
 
 #### Usage notes
-The results of a `compute pressure/uef` are only accurate if it's temperature compute, specified by `temp-ID`, is the temperature compute for a `fix nvt/uef` or `fix npt/uef`. Specifically, the kinetic energy tensor will not be in the correct coordinate system unless this is the case. Additionally, the kinetic energy tensor for `temp-ID` should not be
+The stress tensor computed from `compute pressure/uef` is only accurate if it's temperature compute, specified by `temp-ID`, is a `compute temp/uef`. See the documentation for [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) for further details on output.
+
+### compute temp/uef
+#### Syntax
+* `compute ID all temp/uef`
+  * ID = name for the compute
+  
+#### Examples
+ *`compute c1 all temp/uef`
+
+#### Usage notes
+See the documentation for [`compute temp`](http://lammps.sandia.gov/doc/compute_pressure.html) for further details on output.
 
 ### dump cfg/uef
 * `dump ID all cfg/uef mass type xs ys zs keyword value`
@@ -103,7 +135,7 @@ The simulation box used in the boundary conditions developed by Hunt and Dobson 
 
 <img src="https://github.com/danicholson/UEF/blob/master/img/frames.jpg?raw=true" width=300 />
 
-During most molecular dynamics operations, the system is represented in the LAMMPS frame. Only when the positions and velocities are updated is the system rotated to the flow frame, and it is rotated back to the LAMMPS frame immediately afterwards. For this reason, all vector-valued quantities (except for the pressure tensor from `compute pressure/uef`) will be computed in the LAMMPS frame. Rotationally invariant scalar quantites like the temperature and hydrostatic pressure, on the other hand, will be computed correctly. Additionally, the system is in the LAMMPS frame during all of the output steps, and therefore trajectory files made using the `dump` command will be in the LAMMPS frame. 
+During most molecular dynamics operations, the system is represented in the LAMMPS frame. Only when the positions and velocities are updated is the system rotated to the flow frame, and it is rotated back to the LAMMPS frame immediately afterwards. For this reason, all vector-valued quantities (except for the tensors from `compute pressure/uef` and `compute temp/uef`) will be computed in the LAMMPS frame. Rotationally invariant scalar quantites like the temperature and hydrostatic pressure, on the other hand, will be computed correctly. Additionally, the system is in the LAMMPS frame during all of the output steps, and therefore trajectory files made using the `dump` command will be in the LAMMPS frame unless the `dump cfg/uef` command is used. 
 
 ## Examples
 
@@ -129,7 +161,3 @@ The methods described with inherit error/warning messages from `fix npt/nvt`, `c
 * "Pressure control can't be used with fix nvt/uef" - Self-explanatory.
 * "Temperature control must be used with fix npt/uef" - Self-explanatory.
 * "Pressure control must be used with fix npt/uef" - Self-explanatory.
-
-## TODO
-*  Define new computes that will allow the user to create `dump custom` commands in the flow frame.
-*  Extend functionality to include all diagonalizeable flow fields
