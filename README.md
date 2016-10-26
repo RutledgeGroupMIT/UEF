@@ -123,8 +123,8 @@ The following commands will not work:
 
 ### compute temp/uef
 #### Syntax
-* `compute ID all temp/uef`
-  * ID = name for the compute
+`compute ID all temp/uef`
+* ID = name for the compute
   
 #### Examples
 `compute c1 all temp/uef`
