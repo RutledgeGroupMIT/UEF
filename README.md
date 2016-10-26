@@ -104,20 +104,24 @@ The uef fixes can be used with `write_restart` and `read_restart`, `run_style re
 The usage notes for `fix nvt/uef` apply to `fix npt/uef` as well. There are two ways to control the pressure using this fix. The first method involves using the`ext` keyword along with the `iso` pressure style. With this method, the pressure is controlled by scaling the simulation box isotropically to achieve the average stress in the directions specified by `ext`. 
 
 For example, this command will control the hydrostatic pressure under uniaxial tension:
-* `fix f1 all npt/uef temp 0.7 0.7 0.5 iso 1 1 5 erate -0.5 -0.5 ext xyz`
+`fix f1 all npt/uef temp 0.7 0.7 0.5 iso 1 1 5 erate -0.5 -0.5 ext xyz`
 
 This command will control the average stress in compression directions under uniaxial tension:
-* `fix f1 all npt/uef temp 0.7 0.7 0.5 iso 1 1 5 erate -0.5 -0.5 ext xy`
+`fix f1 all npt/uef temp 0.7 0.7 0.5 iso 1 1 5 erate -0.5 -0.5 ext xy`
 
 The second method involves setting the normal stresses using the `x` `y` , and/or `z` keywords. When using this method, the same pressure must be specified via `Pstart` and `Pstop` for all dimensions controlled. Any choice of pressure conditions that would cause LAMMPS to compute a deviatoric stress are not permissable and will result in an error. Additionally, all dimensions with controlled stress must have the same applied strain rate. The `ext` keyword must be set to the default value (`xyz`) when using this method. 
 
 For example, the following commands will work:
-* `fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 y 1 1 5 erate -0.5 -0.5`
-* `fix f1 all npt/uef temp 0.7 0.7 0.5 z 1 1 5 erate 0.5 0.5`
+```
+fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 y 1 1 5 erate -0.5 -0.5
+fix f1 all npt/uef temp 0.7 0.7 0.5 z 1 1 5 erate 0.5 0.5
+```
 
 The following commands will not work:
-* `fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 z 1 1 5 erate -0.5 -0.5`
-* `fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 z 2 2 5 erate 0.5 0.5`
+```
+fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 z 1 1 5 erate -0.5 -0.5
+fix f1 all npt/uef temp 0.7 0.7 0.5 x 1 1 5 z 2 2 5 erate 0.5 0.5
+```
 
 ***
 
