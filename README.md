@@ -54,14 +54,14 @@ The package defines `fix nvt/uef` and `fix npt/uef` for constant volume and stre
 
 ### fix nvt/uef
 #### Syntax
-* `fix ID all nvt/uef temp Tstart Tstop Tdamp erate eps_x eps_y keyword values ...`
- * ID = name for the fix
- * Tstart,Tstop = external temperature at start/end of run
- * Tdamp = temperature damping parameter (time units)
- * eps_x = strain rate in x dimension 1/(time units) 
- * eps_y = strain rate in y dimension 1/(time units)<br><br>Additional keywords: 
- * strain = initial level of strain (default="0 0"). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.<br>
- * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: tchain, tloop, drag
+`fix ID all nvt/uef temp Tstart Tstop Tdamp erate eps_x eps_y keyword values ...`
+* ID = name for the fix
+* Tstart,Tstop = external temperature at start/end of run
+* Tdamp = temperature damping parameter (time units)
+* eps_x = strain rate in x dimension 1/(time units) 
+* eps_y = strain rate in y dimension 1/(time units)<br><br>Additional keywords: 
+* strain = initial level of strain (default="0 0"). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.<br>
+* The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: tchain, tloop, drag
  
 #### Examples
  * Uniaxial flow<br>`fix f1 all nvt/uef temp 400 400 100 erate 0.00001 -0.000005`
@@ -82,18 +82,18 @@ The uef fixes can be used with `write_restart` and `read_restart`, `run_style re
 
 ### fix npt/uef
 #### Syntax
-* `fix ID all npt/uef temp Tstart Tend Tdamp erate eps_x eps_y keyword value...`
- * ID = name for the fix
- * Tstart,Tstop = external temperature at start/end of run
- * Tdamp = temperature damping parameter (time units)
- * Pstart,Pstop = external pressure at start/end of run
- * Pdamp = pressure damping parameter (time units)
- * eps_x = strain rate in x dimension 1/(time units) 
- * eps_y = strain rate in y dimension 1/(time units)<br><br>Additional keywords: 
- * x or y or z = Pstart Pstop Pdamp
- * iso = Pstart Pstop Pdamp
- * strain = initial level of strain (default=0). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.
- * ext = x or y or z or xy or xz or yz or xyz (default=xyz). These are "external" dimensions used in pressure control. For example, for uniaxial extension in the z direction, x and y correspond to free surfaces. The setting xy will only control (P_xx+P_yy)/2 to the target external pressure.    
+ `fix ID all npt/uef temp Tstart Tend Tdamp erate eps_x eps_y keyword value...`
+* ID = name for the fix
+* Tstart,Tstop = external temperature at start/end of run
+* Tdamp = temperature damping parameter (time units)
+* Pstart,Pstop = external pressure at start/end of run
+* Pdamp = pressure damping parameter (time units)
+* eps_x = strain rate in x dimension 1/(time units) 
+* eps_y = strain rate in y dimension 1/(time units)<br><br>Additional keywords: 
+* x or y or z = Pstart Pstop Pdamp
+* iso = Pstart Pstop Pdamp
+* strain = initial level of strain (default=0). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.
+* ext = x or y or z or xy or xz or yz or xyz (default=xyz). These are "external" dimensions used in pressure control. For example, for uniaxial extension in the z direction, x and y correspond to free surfaces. The setting xy will only control (P_xx+P_yy)/2 to the target external pressure.    
  * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: couple, tchain, pchain, tloop, ploop, drag<br><br>
   
 #### Examples 
@@ -127,7 +127,7 @@ The following commands will not work:
   * ID = name for the compute
   
 #### Examples
- *`compute c1 all temp/uef`
+`compute c1 all temp/uef`
 
 #### Usage notes
 This compute requires a `fix nvt/uef` or `fix npt/uef`. It computes the kinetic energy tensor in the reference frame of the flow field.
@@ -138,13 +138,13 @@ See the documentation for [`compute temp`](http://lammps.sandia.gov/doc/compute_
 
 ### compute pressure/uef
 #### Syntax
-* `compute ID all pressure/uef temp-ID`
- * ID = name for the compute
- * temp-ID = ID of compute that calculates temperature<br><br>Additional keywords: 
- * The following additional keywords from [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) may be used with this fix: ke or pair or bond or angle or dihedral or improper or kspace or fix or virial
+`compute ID all pressure/uef temp-ID`
+* ID = name for the compute
+* temp-ID = ID of compute that calculates temperature<br><br>Additional keywords: 
+* The following additional keywords from [`compute pressure`](http://lammps.sandia.gov/doc/compute_pressure.html) may be used with this fix: ke or pair or bond or angle or dihedral or improper or kspace or fix or virial
  
 #### Examples
-  * `compute c1 all pressure/uef c_1_temp`
+`compute c1 all pressure/uef c_1_temp`
 
 #### Usage notes
 This compute requires a`fix nvt/uef` or `fix npt/uef`. It computes the pressure tensor in the reference frame of the flow field.
@@ -157,13 +157,13 @@ See the documentation for [`compute pressure`](http://lammps.sandia.gov/doc/comp
 
 ### dump cfg/uef
 #### Syntax
-* `dump ID all cfg/uef N file mass type xs ys zs keyword value`
- * N =  dump every this many timesteps
- * file = name of file to write dump info to<br><br>Additional keywords: 
- * See the documentation for [`dump cfg`](http://lammps.sandia.gov/doc/dump.html) for additional keywords.
+`dump ID all cfg/uef N file mass type xs ys zs keyword value`
+* N =  dump every this many timesteps
+* file = name of file to write dump info to<br><br>Additional keywords: 
+* See the documentation for [`dump cfg`](http://lammps.sandia.gov/doc/dump.html) for additional keywords.
   
 #### Examples
-* `dump d1 all cfg/uef 100 dump.*.cfg mass type xs ys zs`
+`dump d1 all cfg/uef 100 dump.*.cfg mass type xs ys zs`
 
 #### Usage notes
 This command requires a `fix nvt/uef` or `fix npt/uef`. It outputs the atomic positions in the reference frame of the flow field. Only the positions are in the proper reference frame; if the atomic velocities are specified as an output, for example, they will not be in the flow field reference frame.
