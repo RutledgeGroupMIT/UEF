@@ -76,7 +76,7 @@ This fix defines a `compute pressure/uef` and `compute temp/uef` that can be be 
 
 When this fix is applied, any orientation-dependent vector or tensor-valued quantities computed, except for the tensors from `compute pressure/uef`/`compute temp/uef` and coordinates from `dump cfg/uef`, will not be in the same coordinate system as the flow field. See the [implementation details](#implementation-details) for further information.
 
-The uef fixes can be used with `write_restart` and `read_restart`, `run_style respa`, and `fix modify`, however custom pressure computes must be of type `pressure/uef`. 
+The uef fixes can be used with `write_restart` and `read_restart`, `run_style respa`, and `fix modify`, however custom pressure and temperature computes must be of type `pressure/uef` and `temp/uef`. When resuming from restart files, you may need to use `box tilt large` since LAMMPS does not always agree that the simulation box is fully reduced.
 
 ***
 
@@ -198,14 +198,16 @@ The methods described with inherit error/warning messages from `fix npt/nvt`, `c
 * "Keyword erate must be set for fix nvt/npt/uef command" - Self-explanatory.
 * "Simulation box must be triclinic for fix/nvt/npt/uef" - Self-explanatory.
 * "Only normal stresses can be controlled with fix/nvt/npt/uef" - The keywords xy xz and yz cannot be used for pressure control.
+* "The ext keyword may only be used with iso pressure control" - Self-explanatory
 * "All controlled stresses must have the same value in fix/nvt/npt/uef" - Stress control is only possible when the stress specified for each dimension is the same 
 * "Dimensions with controlled stresses must have same strain rate in fix/nvt/npt/uef" - Stress-controlled dimensions with the same strain rate must have the same target stress.
 * "Can't use another fix which changes box shape with fix/nvt/npt/uef" - The `fix npt/nvt/uef` command must have full control over the box shape. You cannot use a simultaneous `fix deform` command, for example.
 * "Pressure ID for fix/nvt/uef doesn't exist" - The `compute pressure` introduced via `fix_modify` does not exist
-* "Using fix nvt/npt/uef without a compute pressure/uef" - The `compute pressure` introduced via `fix_modify` is not a `compute pressure/uef`. The computed pressure tensor will not be in the coordinate system of the flow field and the ext keyword will not take effect.
+* "Using fix nvt/npt/uef without a compute pressure/uef" - The `compute pressure` introduced via `fix_modify` is not a `compute pressure/uef`.
 * "Initial box is not close enough to the expected uef box" - The initial box does not correspond to the shape required by the value of the strain keyword. If the default strain value of zero was used, the initial box is not cubic.
 * "Can't use compute pressure/uef without defining a fix nvt/npt/uef" - Self-explanatory.
-* "Can't use dump cfg/uef without defining a fix nvt/npt/uef" - Self-explanatory.
+* "Can't use compute pressure/uef without defining a fix nvt/npt/uef" - Self-explanatory.
+* "Can't use compute/temp without defining a fix nvt/npt/uef" - Self-explanatory.
 * "Temperature control must be used with fix nvt/uef" - Self-explanatory.
 * "Pressure control can't be used with fix nvt/uef" - Self-explanatory.
 * "Temperature control must be used with fix npt/uef" - Self-explanatory.
