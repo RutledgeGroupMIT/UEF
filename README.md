@@ -22,6 +22,7 @@ Support provided via [issues](https://github.com/danicholson/UEF/issues) and/or 
 * [Implementation Details](#implementation-details)
 * [Examples](#examples)
 * [Error and Warning Messages](#error-and-warning-messages)
+* [Citing the UEF package](#citing-the-uef-package)
 
 
 ## Installation
@@ -76,7 +77,7 @@ This fix defines a `compute pressure/uef` and `compute temp/uef` that can be be 
 
 When this fix is applied, any orientation-dependent vector or tensor-valued quantities computed, except for the tensors from `compute pressure/uef`/`compute temp/uef` and coordinates from `dump cfg/uef`, will not be in the same coordinate system as the flow field. See the [implementation details](#implementation-details) for further information.
 
-The uef fixes can be used with `write_restart` and `read_restart`, `run_style respa`, and `fix modify`, however custom pressure and temperature computes must be of type `pressure/uef` and `temp/uef`. When resuming from restart files, you may need to use `box tilt large` since LAMMPS does not always agree that the simulation box is fully reduced.
+This fix can be used with `write_restart` and `read_restart`, `run_style respa`, and `fix modify`, however custom pressure and temperature computes must be of type `pressure/uef` and `temp/uef`. When resuming from restart files, you may need to use `box tilt large` since LAMMPS does not always agree that the simulation box is fully reduced.
 
 ***
 
@@ -111,7 +112,7 @@ This command will control the average stress in compression directions under uni
 
 `fix f1 all npt/uef temp 0.7 0.7 0.5 iso 1 1 5 erate -0.5 -0.5 ext xy`
 
-The second method involves setting the normal stresses using the `x` `y` , and/or `z` keywords. When using this method, the same pressure must be specified via `Pstart` and `Pstop` for all dimensions controlled. Any choice of pressure conditions that would cause LAMMPS to compute a deviatoric stress are not permissable and will result in an error. Additionally, all dimensions with controlled stress must have the same applied strain rate. The `ext` keyword must be set to the default value (`xyz`) when using this method. 
+The second method involves setting the normal stresses using the `x`, `y` , and/or `z` keywords. When using this method, the same pressure must be specified via `Pstart` and `Pstop` for all dimensions controlled. Any choice of pressure conditions that would cause LAMMPS to compute a deviatoric stress are not permissable and will result in an error. Additionally, all dimensions with controlled stress must have the same applied strain rate. The `ext` keyword must be set to the default value (`xyz`) when using this method. 
 
 For example, the following commands will work:
 ```
@@ -212,3 +213,7 @@ The methods described with inherit error/warning messages from `fix npt/nvt`, `c
 * "Pressure control can't be used with fix nvt/uef" - Self-explanatory.
 * "Temperature control must be used with fix npt/uef" - Self-explanatory.
 * "Pressure control must be used with fix npt/uef" - Self-explanatory.
+
+## Citing the UEF package
+
+Coming soon. Please check back for the relevant citation.
