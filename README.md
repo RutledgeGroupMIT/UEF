@@ -28,7 +28,7 @@ Support provided via [issues](https://github.com/danicholson/UEF/issues) and/or 
 ## Installation
 The implementation has been tested in the Jul. 30, 2016 stable version of LAMMPS. Older versions may not be compatible.
 
-The USER-UEF package is compiled within LAMMPS, and doesn't require any additional libraries or modify the LAMMPS source code.
+The UEF package is compiled within LAMMPS, and doesn't require any additional libraries or modify the LAMMPS source code.
 
 To install the package from a LAMMPS distribution located at `lammps/`
 
@@ -61,7 +61,7 @@ The package defines `fix nvt/uef` and `fix npt/uef` for constant volume and stre
 * Tdamp = temperature damping parameter (time units)
 * eps_x = strain rate in x dimension 1/(time units) 
 * eps_y = strain rate in y dimension 1/(time units)<br><br>Additional keywords: 
-* strain = initial level of strain (default="0 0"). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.<br>
+* strain = initial level of strain (default="0 0"). Use of this keyword is not recommended, but may be necessary when resuming a run with data file. This keyword is not needed when restart files are used.<br>
 * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: tchain, tloop, drag
  
 #### Examples
@@ -73,7 +73,7 @@ Due to requirements of the boundary conditions, when the strain keyword is unset
 
 This fix integrates the SLLOD equations of motion, which lead to an instability in the center of mass velocity under extension. A [`fix momentum`](http://lammps.sandia.gov/doc/fix_momentum.html) should be used to regularly reset the linear momentum. Additionally, this fix stores the peculiar velocity of each atom, defined as the velocity relative to the streaming velocity. This is in contrast to the LAMMPS [`fix nvt/sllod`](http://lammps.sandia.gov/doc/fix_nvt_sllod.html?highlight=sllod) command.
 
-This fix defines a `compute pressure/uef` and `compute temp/uef` that can be be accessed at `c_ID_press` and `c_ID_temp` respectively for scalar values, or `c_ID_press[i]` and `c_ID_temp[i]` for the pressure and kinetic energy tensors.
+This fix defines a `compute pressure/uef` and `compute temp/uef` that can be accessed at `c_ID_press` and `c_ID_temp` respectively for scalar values, or `c_ID_press[i]` and `c_ID_temp[i]` for the pressure and kinetic energy tensors.
 
 When this fix is applied, any orientation-dependent vector or tensor-valued quantities computed, except for the tensors from `compute pressure/uef`/`compute temp/uef` and coordinates from `dump cfg/uef`, will not be in the same coordinate system as the flow field. See the [implementation details](#implementation-details) for further information.
 
@@ -93,7 +93,7 @@ This fix can be used with `write_restart` and `read_restart`, `run_style respa`,
 * eps_y = strain rate in y dimension 1/(time units)<br><br>Additional keywords: 
 * x or y or z = Pstart Pstop Pdamp
 * iso = Pstart Pstop Pdamp
-* strain = initial level of strain (default=0). Use of this keyword is not recommended, but may be recessary when resuming a run with data file. This keyword is not needed when restart files are used.
+* strain = initial level of strain (default=0). Use of this keyword is not recommended, but may be necessary when resuming a run with data file. This keyword is not needed when restart files are used.
 * ext = x or y or z or xy or xz or yz or xyz (default=xyz). These are "external" dimensions used in pressure control. For example, for uniaxial extension in the z direction, x and y correspond to free surfaces. The setting xy will only control (P_xx+P_yy)/2 to the target external pressure.    
  * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: couple, tchain, pchain, tloop, ploop, drag<br><br>
   
@@ -112,7 +112,7 @@ This command will control the average stress in compression directions under uni
 
 `fix f1 all npt/uef temp 0.7 0.7 0.5 iso 1 1 5 erate -0.5 -0.5 ext xy`
 
-The second method involves setting the normal stresses using the `x`, `y` , and/or `z` keywords. When using this method, the same pressure must be specified via `Pstart` and `Pstop` for all dimensions controlled. Any choice of pressure conditions that would cause LAMMPS to compute a deviatoric stress are not permissable and will result in an error. Additionally, all dimensions with controlled stress must have the same applied strain rate. The `ext` keyword must be set to the default value (`xyz`) when using this method. 
+The second method involves setting the normal stresses using the `x`, `y` , and/or `z` keywords. When using this method, the same pressure must be specified via `Pstart` and `Pstop` for all dimensions controlled. Any choice of pressure conditions that would cause LAMMPS to compute a deviatoric stress are not permissible and will result in an error. Additionally, all dimensions with controlled stress must have the same applied strain rate. The `ext` keyword must be set to the default value (`xyz`) when using this method. 
 
 For example, the following commands will work:
 ```
@@ -181,11 +181,11 @@ See the [`dump cfg`](http://lammps.sandia.gov/doc/dump.html) documentation for f
 
 ## Implementation Details
 
-The simulation box used in the boundary conditions developed by Hunt and Dobson does not have a consistent alignment relative to the applied flow field. This can be seen in the video of the simulation box under uniaxial extension at the top of the page. LAMMPS utilizes an upper-triangular simulation box, making it impossible to express the evolving simulation box in the same coordinate system as the flow field. The USER-UEF package keeps track of two coordinate systems: the flow frame, and the upper triangular LAMMPS frame. The coordinate systems are related to each other through the QR decomposition, as is illustrated in the image below.
+The simulation box used in the boundary conditions developed by Hunt and Dobson does not have a consistent alignment relative to the applied flow field. This can be seen in the video of the simulation box under uniaxial extension at the top of the page. LAMMPS utilizes an upper-triangular simulation box, making it impossible to express the evolving simulation box in the same coordinate system as the flow field. The UEF package keeps track of two coordinate systems: the flow frame, and the upper triangular LAMMPS frame. The coordinate systems are related to each other through the QR decomposition, as is illustrated in the image below.
 
 <img src="https://github.com/danicholson/UEF/blob/master/img/frames.jpg?raw=true" width=300 />
 
-During most molecular dynamics operations, the system is represented in the LAMMPS frame. Only when the positions and velocities are updated is the system rotated to the flow frame, and it is rotated back to the LAMMPS frame immediately afterwards. For this reason, all vector-valued quantities (except for the tensors from `compute pressure/uef` and `compute temp/uef`) will be computed in the LAMMPS frame. Rotationally invariant scalar quantites like the temperature and hydrostatic pressure, on the other hand, will be computed correctly. Additionally, the system is in the LAMMPS frame during all of the output steps, and therefore trajectory files made using the `dump` command will be in the LAMMPS frame unless the `dump cfg/uef` command is used. 
+During most molecular dynamics operations, the system is represented in the LAMMPS frame. Only when the positions and velocities are updated is the system rotated to the flow frame, and it is rotated back to the LAMMPS frame immediately afterwards. For this reason, all vector-valued quantities (except for the tensors from `compute pressure/uef` and `compute temp/uef`) will be computed in the LAMMPS frame. Rotationally invariant scalar quantities like the temperature and hydrostatic pressure, on the other hand, will be computed correctly. Additionally, the system is in the LAMMPS frame during all of the output steps, and therefore trajectory files made using the `dump` command will be in the LAMMPS frame unless the `dump cfg/uef` command is used. 
 
 ## Examples
 
