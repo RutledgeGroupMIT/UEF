@@ -95,7 +95,7 @@ This fix can be used with `write_restart` and `read_restart`, `run_style respa`,
 * iso = Pstart Pstop Pdamp
 * strain = initial level of strain (default=0). Use of this keyword is not recommended, but may be necessary when resuming a run with data file. This keyword is not needed when restart files are used.
 * ext = x or y or z or xy or xz or yz or xyz (default=xyz). These are "external" dimensions used in pressure control. For example, for uniaxial extension in the z direction, x and y correspond to free surfaces. The setting xy will only control (P_xx+P_yy)/2 to the target external pressure.    
- * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: couple, tchain, pchain, tloop, ploop, drag<br><br>
+* The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: couple, tchain, pchain, tloop, ploop, drag<br><br>
   
 #### Examples 
 * Uniaxial flow<br>`fix f1 all npt/uef temp 400 400 300 iso 1 1 3000 erate 0.00001 -0.000005 ext yz`
