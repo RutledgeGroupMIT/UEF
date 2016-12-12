@@ -61,7 +61,7 @@ The package defines `fix nvt/uef` and `fix npt/uef` for constant volume and stre
 * Tdamp = temperature damping parameter (time units)
 * eps_x = strain rate in x dimension 1/(time units) 
 * eps_y = strain rate in y dimension 1/(time units)<br><br>Additional keywords: 
-* strain = initial level of strain (default="0 0"). Use of this keyword is not recommended, but may be necessary when resuming a run with data file. This keyword is not needed when restart files are used.<br>
+* strain = initial level of strain (default="0 0"). Use of this keyword is not recommended, but may be necessary when resuming a run from a data file. This keyword should be leftunse when restart files are used.<br>
 * The following additional keywords from [`fix nvt`](http://lammps.sandia.gov/doc/fix_nh.html) can be used with this fix: tchain, tloop, drag
  
 #### Examples
