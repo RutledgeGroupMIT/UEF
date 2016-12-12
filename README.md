@@ -40,7 +40,7 @@ The following commands will install the package in a fresh version of the curren
 ```
 wget http://lammps.sandia.gov/tars/lammps-stable.tar.gz
 tar -xvf lammps-stable.tar.gz
-git clone https://github.com/danicholson/UEF.git
+git clone https://github.com/RutledgeGroupMIT/UEF.git
 cp -r UEF/USER-UEF/ lammps-*/src
 cd lammps-*/src/
 make yes-user-uef
