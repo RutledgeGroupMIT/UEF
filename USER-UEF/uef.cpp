@@ -1,5 +1,4 @@
-#include <iostream>
-#include <sstream>
+#include <math.h>
 #include "uef.h"
 
 /* This class contains functions to calculate the evolution of the periodic 

@@ -1,4 +1,3 @@
-#include <math.h>
 
 /* This class contains functions to calculate the evolution of the periodic 
  * simulation box under elongational flow as described by Matthew Dobson

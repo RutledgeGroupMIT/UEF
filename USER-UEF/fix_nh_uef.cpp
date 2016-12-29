@@ -154,12 +154,12 @@ FixNHUef::FixNHUef(LAMMPS *lmp, int narg, char **arg) :
       error->all(FLERR,"Illegal fix nvt/npt/uef command");
   }
   if (!erate_flag)
-      error->all(FLERR,"Keyword erate must be set for fix npt/npt/uef command");
+    error->all(FLERR,"Keyword erate must be set for fix npt/npt/uef command");
 
   if (mtchain_default_flag) mtchain=1;
 
   if (!domain->triclinic)
-      error->all(FLERR,"Simulation box must be triclinic for fix/nvt/npt/uef");
+    error->all(FLERR,"Simulation box must be triclinic for fix/nvt/npt/uef");
 
   //check for conditions that impose a deviatoric stress
   if (pstyle == TRICLINIC)
@@ -273,7 +273,7 @@ void FixNHUef::init()
   {
     if (strcmp(modify->fix[i]->id,id) != 0)
       if (modify->fix[i]->box_change_shape != 0)
-      error->all(FLERR,"Can't use another fix which changes box shape with fix/nvt/npt/uef");
+        error->all(FLERR,"Can't use another fix which changes box shape with fix/nvt/npt/uef");
   }
 
 
@@ -288,9 +288,9 @@ void FixNHUef::init()
 
     }
   if (strcmp(pressure->style,"pressure/uef") != 0)
-      error->all(FLERR,"Using fix nvt/npt/uef without a compute pressure/uef");
+    error->all(FLERR,"Using fix nvt/npt/uef without a compute pressure/uef");
   if (strcmp(temperature->style,"temp/uef") != 0)
-      error->all(FLERR,"Using fix nvt/npt/uef without a compute temp/uef");
+    error->all(FLERR,"Using fix nvt/npt/uef without a compute temp/uef");
   
 }
 
