@@ -216,4 +216,6 @@ The methods described with inherit error/warning messages from `fix npt/nvt`, `c
 
 ## Citing the UEF package
 
-Coming soon. Please check back for the relevant citation.
+Users of this package are encouraged to cite the following article in scientific publications:
+
+D.A. Nicholson, G.C. Rutledge, "Molecular simulation of flow-enhanced nucleation in *n*-eicosane melts under steady shear and uniaxial extension", *J. Chem Phys.*, 2016, **145** (24), http://aip.scitation.org/doi/full/10.1063/1.4972894.
