@@ -3,7 +3,7 @@ A LAMMPS package for molecular dynamics under extensional flow fields
 
 <img src="https://github.com/danicholson/UEF/blob/master/img/uniaxial_box.gif?raw=true" width=300 />
 
-UEF is a LAMMPS package for non-equilibrium molecular dynamics (NEMD) under diagonal flow fields, including uniaxial and biaxial flows. With this package, simulations under flow may be carried out for an indefinite amount of time, extending the functionality of LAMMPS to include steady-state diagonal flow fields. It is an implementation of the boundary conditions developed by [Matthew Dobson](http://arxiv.org/abs/1408.7078), and also uses numerical lattice reduction as was proposed by [Thomas Hunt](http://arxiv.org/abs/1310.3905). The lattice reduction algorithm used was developed by [Igor Semaev](http://link.springer.com/chapter/10.1007%2F3-540-44670-2_13). The package is intended for simulations of homogeneous flows, and integrates the SLLOD equations of motion. 
+UEF is a LAMMPS package for non-equilibrium molecular dynamics (NEMD) under diagonal flow fields, including uniaxial and biaxial flow. With this package, simulations under extensional flow may be carried out for an indefinite amount of time. It is an implementation of the boundary conditions developed by [Matthew Dobson](http://arxiv.org/abs/1408.7078), and also uses numerical lattice reduction as was proposed by [Thomas Hunt](http://arxiv.org/abs/1310.3905). The lattice reduction algorithm is from [Igor Semaev](http://link.springer.com/chapter/10.1007%2F3-540-44670-2_13). The package is intended for simulations of homogeneous flows, and integrates the SLLOD equations of motion. 
 
 Authored by:
 [David Nicholson](https://github.com/danicholson)<br>
@@ -28,7 +28,7 @@ Support provided via [issues](https://github.com/danicholson/UEF/issues) and/or 
 ## Installation
 The implementation has been tested in the Jul. 30, 2016 stable version of LAMMPS. Older versions may not be compatible.
 
-The UEF package is compiled within LAMMPS, and doesn't require any additional libraries or modify the LAMMPS source code.
+The UEF package is compiled within LAMMPS, and doesn't require any additional libraries or modification to the LAMMPS source code.
 
 To install the package from a LAMMPS distribution located at `lammps/`
 
@@ -69,9 +69,11 @@ The package defines `fix nvt/uef` and `fix npt/uef` for constant volume and stre
  * Biaxial flow<br>`fix f2 all nvt/uef temp 400 400 100 erate 0.000005 0.000005`
 
 #### Usage notes
+The applied flow field must be traceless, and therefore only the xx and yy components of the rate-of-deformation tensor need to be specified ( by `eps_x` and `eps_y` respectively). The zz component of the rate-of-deformation tensor is always  -(`eps_x` + `eps_y`).
+
 Due to requirements of the boundary conditions, when the strain keyword is unset, or set to zero, the initial simulation box must be cubic and have style triclinic. If the box is initially of type ortho, use the command `change box all triclinic` before invoking the fix.
 
-This fix integrates the SLLOD equations of motion, which lead to an instability in the center of mass velocity under extension. A [`fix momentum`](http://lammps.sandia.gov/doc/fix_momentum.html) should be used to regularly reset the linear momentum. Additionally, this fix stores the peculiar velocity of each atom, defined as the velocity relative to the streaming velocity. This is in contrast to the LAMMPS [`fix nvt/sllod`](http://lammps.sandia.gov/doc/fix_nvt_sllod.html?highlight=sllod) command.
+This fix integrates the SLLOD equations of motion, which lead to an instability in the center of mass velocity under extension. A [`fix momentum`](http://lammps.sandia.gov/doc/fix_momentum.html) should be used to regularly reset the linear momentum. Additionally, this fix stores the peculiar velocity of each atom, defined as the velocity relative to the streaming velocity. This is in contrast to the LAMMPS [`fix nvt/sllod`](http://lammps.sandia.gov/doc/fix_nvt_sllod.html?highlight=sllod) command, which uses a lab-frame velocity.
 
 This fix defines a `compute pressure/uef` and `compute temp/uef` that can be accessed at `c_ID_press` and `c_ID_temp` respectively for scalar values, or `c_ID_press[i]` and `c_ID_temp[i]` for the pressure and kinetic energy tensors.
 
