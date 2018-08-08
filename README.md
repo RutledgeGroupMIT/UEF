@@ -1,7 +1,7 @@
 # UEF
 A LAMMPS package for molecular dynamics under extensional flow fields
 
-Note: As of 10/23/2017, this package has been included in LAMMPS as the USER-UEF package. Installation and usage details can be found [here](http://lammps.sandia.gov/doc/Section_packages.html#user-uef).
+Note: As of 10/23/2017, this package has been included in LAMMPS as the USER-UEF package. Installation and usage details can be found [here](https://lammps.sandia.gov/doc/Packages_details.html#user-uef-package).
 
 <img src="https://github.com/danicholson/UEF/blob/master/img/uniaxial_box.gif?raw=true" width=300 />
 
